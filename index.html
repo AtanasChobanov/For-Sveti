@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="bg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Коледна Изненада</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/png" href="christmas-tree.png" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Georgia", serif;
+        overflow-x: hidden;
+        transition: background-color 1s ease;
+      }
+
+      /* ТЕРМИНАЛЕН ЕКРАН */
+      #terminal-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: #0b0b0b;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 1;
+        transition: opacity 1s ease;
+      }
+
+      #terminal-screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .terminal {
+        background: #1a1a1a;
+        border: 2px solid #00ff9c;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 0 30px rgba(0, 255, 156, 0.3);
+        font-family: "Courier New", monospace;
+        color: #00ff9c;
+        overflow: hidden;
+      }
+
+      .terminal-header {
+        background: #2a2a2a;
+        padding: 10px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #00ff9c;
+        margin: -1px -1px 0 -1px;
+      }
+
+      .terminal-title {
+        font-size: 14px;
+        color: #00ff9c;
+        font-weight: normal;
+      }
+
+      .terminal-buttons {
+        display: flex;
+        gap: 8px;
+      }
+
+      .terminal-button {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+
+      .terminal-button:hover {
+        opacity: 0.7;
+      }
+
+      .btn-close {
+        background: #ff5f56;
+      }
+
+      .btn-minimize {
+        background: #ffbd2e;
+      }
+
+      .btn-maximize {
+        background: #27c93f;
+      }
+
+      .terminal-body {
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        max-height: 400px;
+      }
+
+      .terminal-output {
+        margin-bottom: 20px;
+        line-height: 1.6;
+        min-height: 100px;
+        max-height: 280px;
+        overflow-y: auto;
+        padding-right: 10px;
+      }
+
+      /* Стилизиране на скролбара */
+      .terminal-output::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .terminal-output::-webkit-scrollbar-track {
+        background: #1a1a1a;
+        border-radius: 4px;
+      }
+
+      .terminal-output::-webkit-scrollbar-thumb {
+        background: #00ff9c;
+        border-radius: 4px;
+      }
+
+      .terminal-output::-webkit-scrollbar-thumb:hover {
+        background: #00cc7a;
+      }
+
+      .terminal-line {
+        margin-bottom: 10px;
+        opacity: 0;
+        animation: fadeIn 0.5s ease forwards;
+      }
+
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+
+      .terminal-input-line {
+        display: flex;
+        align-items: center;
+      }
+
+      .terminal-prompt {
+        margin-right: 10px;
+      }
+
+      #terminal-input {
+        background: transparent;
+        border: none;
+        color: #00ff9c;
+        font-family: "Courier New", monospace;
+        font-size: 16px;
+        outline: none;
+        flex: 1;
+        caret-color: #00ff9c;
+      }
+
+      .cursor {
+        display: inline-block;
+        width: 10px;
+        height: 20px;
+        background: #00ff9c;
+        animation: blink 1s infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        49% {
+          opacity: 1;
+        }
+        50%,
+        100% {
+          opacity: 0;
+        }
+      }
+
+      /* СЪРЦЕ АНИМАЦИЯ */
+      #heart-animation {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        z-index: 1001;
+        pointer-events: none;
+      }
+
+      #heart-animation.show {
+        opacity: 1;
+        animation: heartBeatAndGrow 3s ease-in-out forwards;
+      }
+
+      #heart-animation.shrink {
+        animation: heartShrink 1.5s ease-in-out forwards;
+      }
+
+      @keyframes heartBeatAndGrow {
+        0% {
+          transform: translate(-50%, -50%) scale(1);
+        }
+        10%,
+        30% {
+          transform: translate(-50%, -50%) scale(1.2);
+        }
+        20%,
+        40% {
+          transform: translate(-50%, -50%) scale(1);
+        }
+        60% {
+          transform: translate(-50%, -50%) scale(1);
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(50);
+          opacity: 1;
+        }
+      }
+
+      @keyframes heartShrink {
+        0% {
+          transform: translate(-50%, -50%) scale(50);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(0);
+          opacity: 1;
+        }
+      }
+
+      .heart {
+        width: 100px;
+        height: 100px;
+        position: relative;
+      }
+
+      .heart::before,
+      .heart::after {
+        content: "";
+        position: absolute;
+        width: 52px;
+        height: 80px;
+        background: #ff6b9d;
+        border-radius: 50px 50px 0 0;
+      }
+
+      .heart::before {
+        left: 50px;
+        transform: rotate(-45deg);
+        transform-origin: 0 100%;
+      }
+
+      .heart::after {
+        left: 0;
+        transform: rotate(45deg);
+        transform-origin: 100% 100%;
+      }
+      #main-content {
+        display: none;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f5f0e8 0%, #fdf8f0 100%);
+        padding-top: 40px;
+        position: relative;
+        overflow: hidden;
+        opacity: 0;
+      }
+
+      #main-content.show {
+        display: block;
+        animation: fadeInContent 1.5s ease forwards;
+      }
+
+      @keyframes fadeInContent {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* СНЯГ */
+      .snowflake {
+        position: fixed;
+        top: -10px;
+        color: #fff;
+        font-size: 1em;
+        opacity: 0.8;
+        pointer-events: none;
+        animation: fall linear infinite;
+        z-index: 1;
+      }
+
+      @keyframes fall {
+        to {
+          transform: translateY(100vh);
+        }
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+      }
+
+      @media (max-width: 810px) {
+        .container {
+          padding: 0 20px;
+        }
+      }
+
+      h1 {
+        font-family: "Great Vibes", cursive;
+        font-style: normal;
+        font-size: 4em;
+        padding: 50px;
+        color: #8b4513;
+        text-align: center;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        font-family: "Great Vibes", cursive;
+        font-style: normal;
+        font-size: 1.8em;
+        color: #c87d5c;
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      h3 {
+        font-family: "Great Vibes", cursive;
+        font-style: normal;
+      }
+
+      .letter-section {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        margin-bottom: 12vh;
+        line-height: 1.8;
+        color: #5a4a42;
+        position: relative;
+        z-index: 2;
+      }
+
+      .letter-section::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        padding: 10px;
+        border-radius: 14px;
+        background: repeating-linear-gradient(
+          45deg,
+          #c41e3a 0 18px,
+          #ffffff 18px 36px,
+          #2e8b57 36px 54px
+        );
+        -webkit-mask: linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        z-index: -1;
+      }
+
+      .letter-section p {
+        margin-bottom: 20px;
+        font-size: 1.1em;
+      }
+
+      .reasons-title {
+        font-size: 3em;
+        color: #8b4513;
+        text-align: center;
+        margin-bottom: 30px;
+        margin-top: 20px;
+      }
+
+      .reasons-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+      }
+
+      .reason-card {
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+        padding: 25px;
+        border-radius: 15px;
+        border-left: 5px solid #ff6b9d;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .reason-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .reason-number {
+        font-size: 2em;
+        color: #ff6b9d;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .reason-text {
+        color: #5a4a42;
+        font-size: 1.05em;
+        line-height: 1.6;
+      }
+
+      /* ТАЙМЕР */
+      .timer-section {
+        background: linear-gradient(135deg, #ff6b9d 0%, #ff9dc6 100%);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(255, 107, 157, 0.3);
+        margin-bottom: 12vh;
+        text-align: center;
+        color: white;
+      }
+
+      .timer-title {
+        font-size: 1.8em;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .timer-display {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+      }
+
+      .timer-unit {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 20px 30px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+      }
+
+      .timer-value {
+        font-size: 3em;
+        font-weight: bold;
+        display: block;
+      }
+
+      .timer-label {
+        font-size: 1em;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      .flip-value {
+        position: relative;
+        height: 1.2em;
+        overflow: hidden;
+        font-size: 2em;
+        font-weight: bold;
+        display: block;
+      }
+
+      .flip-inner {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        animation: flipUp 0.4s ease forwards;
+      }
+
+      @keyframes flipUp {
+        from {
+          transform: translateY(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      /* КОЛЕДЕН ПОДАРЪК */
+      .gift-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 500px;
+      }
+
+      .gift-box {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        background: linear-gradient(135deg, #c41e3a 0%, #e63946 100%);
+        border-radius: 10px;
+        box-shadow: 0 20px 60px rgba(196, 30, 58, 0.4);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.8s ease;
+      }
+
+      .gift-box:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 30px 80px rgba(196, 30, 58, 0.5);
+      }
+
+      /* Вертикална панделка */
+      .ribbon-vertical {
+        position: absolute;
+        width: 60px;
+        height: 100%;
+        background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%);
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Хоризонтална панделка */
+      .ribbon-horizontal {
+        position: absolute;
+        width: 100%;
+        height: 60px;
+        background: linear-gradient(180deg, #ffd700 0%, #ffed4e 100%);
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Панделка отгоре */
+      .bow {
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 60px;
+      }
+
+      .bow-left,
+      .bow-right {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        border-radius: 50% 50% 50% 0;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .bow-left {
+        left: 0;
+        transform: rotate(-45deg);
+      }
+
+      .bow-right {
+        right: 0;
+        transform: rotate(135deg);
+      }
+
+      .bow-center {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        z-index: 1;
+      }
+
+      .open-gift-btn {
+        position: relative;
+        z-index: 2;
+        background: white;
+        color: #c41e3a;
+        border: none;
+        padding: 20px 40px;
+        font-size: 1.2em;
+        font-weight: bold;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        font-family: "Georgia", serif;
+        opacity: 1;
+      }
+
+      .open-gift-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      }
+
+      .open-gift-btn.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* Видео контейнер */
+      .gift-video-container {
+        display: none;
+        text-align: center;
+        opacity: 0;
+        animation: fadeIn 1.5s ease forwards;
+        width: 100%;
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+        padding: 25px;
+        border-radius: 15px;
+        border: 4px solid #ff6b9d;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .gift-video-container.show {
+        display: block;
+      }
+
+      .gift-video-title {
+        font-size: 2.5em;
+        color: #c41e3a;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .gift-video-container video {
+        width: 100%;
+        max-width: 700px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        margin: 20px 0;
+      }
+
+      iframe {
+        margin: 20px 0;
+      }
+
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 3em;
+        }
+        h2 {
+          font-size: 2em;
+        }
+        h3 {
+          font-size: 2em !important;
+        }
+        .letter-section {
+          padding: 25px;
+        }
+        .reasons-grid {
+          grid-template-columns: 1fr;
+        }
+        .timer-unit {
+          padding: 15px 20px;
+        }
+        .timer-value {
+          font-size: 2em;
+        }
+        .gift-video-title {
+          font-size: 1.8em;
+        }
+        iframe {
+          height: 200px;
+        }
+      }
+
+      /* ❄️ ЗАСНЕЖЕН ФУТЪР */
+      .snow-footer {
+        position: relative; /* вече НЕ е fixed */
+        width: 100%;
+        height: 140px;
+        margin-top: 80px;
+        overflow: hidden;
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      /* Основен слой сняг */
+      .snow-layer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 90px;
+        background: linear-gradient(
+          to top,
+          #ffffff 0%,
+          #f2f2f2 60%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        border-top-left-radius: 60% 50px;
+        border-top-right-radius: 60% 50px;
+        box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Втори слой – дълбочина */
+      .snow-layer.soft {
+        height: 70px;
+        opacity: 0.75;
+        filter: blur(3px);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ТЕРМИНАЛЕН ЕКРАН -->
+    <div id="terminal-screen">
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-title">Love Terminal</div>
+          <div class="terminal-buttons">
+            <div class="terminal-button btn-close"></div>
+            <div class="terminal-button btn-minimize"></div>
+            <div class="terminal-button btn-maximize"></div>
+          </div>
+        </div>
+        <div class="terminal-body">
+          <div class="terminal-output" id="terminal-output">
+            <div class="terminal-line" style="animation-delay: 0s">
+              Тази страница е заключена.
+            </div>
+            <div class="terminal-line" style="animation-delay: 0.8s">
+              Само ти знаеш паролата.
+            </div>
+            <div class="terminal-line" style="animation-delay: 1.6s">
+              Напиши "help" за помощ.
+            </div>
+            <div class="terminal-line" style="animation-delay: 1.6s">
+              &nbsp;
+            </div>
+          </div>
+          <div class="terminal-input-line">
+            <span class="terminal-prompt">></span>
+            <input
+              type="text"
+              id="terminal-input"
+              autofocus
+              autocomplete="off"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- СЪРЦЕ АНИМАЦИЯ -->
+    <div id="heart-animation">
+      <div class="heart"></div>
+    </div>
+
+    <!-- ОСНОВНА СТРАНИЦА -->
+    <div id="main-content">
+      <div class="container">
+        <h1>Тази Коледа е за теб, Свети!</h1>
+
+        <div class="letter-section">
+          <p>Здравей, слънце,</p>
+          <p>
+            Тази Коледа е специална. Не заради празника, а защото най-големият
+            ми подарък си ти. С теб – дори от разстояние – деня ми е една идея
+            по-добър. 😊
+          </p>
+          <p>
+            Всеки път, когато мисля за теб, първото, което виждам, са сините ти
+            очи. И макар разстоянието да не е малко, ние продължаваме да се
+            държим един за друг – и това означава повече, отколкото мога да
+            обясня.
+          </p>
+          <p>Липсваш ми и нямам търпение скоро отново да те видя.</p>
+          <p>
+            Създадох тази страница – за да ти показва и да ти напомня колко
+            много значиш за мен, дори когато не успявам да го кажа с думи.
+          </p>
+          <p>Обичам те. ❤️</p>
+          <p>Наско</p>
+        </div>
+
+        <h3 class="reasons-title">12 причини защо те обичам</h3>
+
+        <div class="reasons-grid">
+          <div class="reason-card">
+            <div class="reason-number">1</div>
+            <div class="reason-text">
+              Не просто красива, пленяващо красива си
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-number">2</div>
+            <div class="reason-text">Сините ти очи💙</div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-number">3</div>
+            <div class="reason-text">Най-умната студентка в СУ</div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-number">4</div>
+            <div class="reason-text">Имаш вкус за музика</div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-number">5</div>
+            <div class="reason-text">Правиш деня ми по-добър</div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-number">6</div>
+            <div class="reason-text">
+              Нежността в погледа ти, когато ме гледаш
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-number">7</div>
+            <div class="reason-text">Винаги вярваш в мен</div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-number">8</div>
+            <div class="reason-text">
+              Всеки малък момент, който правим заедно незабравим
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-number">9</div>
+            <div class="reason-text">Искрена си с мен</div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-number">10</div>
+            <div class="reason-text">Самостоятелна и независима</div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-number">11</div>
+            <div class="reason-text">
+              Времето лети бързо, когато съм с теб, и мъчително бавно без теб
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-number">12</div>
+            <div class="reason-text">
+              Просто защото си ТИ, Светослава - неповторима и перфектна
+            </div>
+          </div>
+        </div>
+
+        <!-- ТАЙМЕР -->
+        <div class="timer-section">
+          <div class="timer-title">Откакто сме заедно, са изминали:</div>
+          <div class="timer-display">
+            <div class="timer-unit">
+              <div class="flip-value" id="days">0</div>
+              <span class="timer-label">дни</span>
+            </div>
+            <div class="timer-unit">
+              <div class="flip-value" id="hours">0</div>
+              <span class="timer-label">часа</span>
+            </div>
+            <div class="timer-unit">
+              <div class="flip-value" id="minutes">0</div>
+              <span class="timer-label">минути</span>
+            </div>
+            <div class="timer-unit">
+              <div class="flip-value" id="seconds">0</div>
+              <span class="timer-label">секунди</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- КОЛЕДЕН ПОДАРЪК -->
+        <div class="gift-section" id="gift-section">
+          <div class="gift-box" id="gift-box">
+            <div class="ribbon-vertical"></div>
+            <div class="ribbon-horizontal"></div>
+            <div class="bow">
+              <div class="bow-left"></div>
+              <div class="bow-right"></div>
+              <div class="bow-center"></div>
+            </div>
+            <button class="open-gift-btn" id="open-gift-btn">
+              Отвори подаръка
+            </button>
+          </div>
+          <div class="gift-video-container" id="gift-video-container">
+            <h3 class="gift-video-title">Специално за теб ❤️</h3>
+            <iframe
+              width="100%"
+              height="400"
+              src="https://www.youtube.com/embed/7jPZMmWFpeQ"
+              frameborder="0"
+              allowfullscreen
+            ></iframe>
+
+            <h3 class="gift-video-title">Bella Ciao - Здравей красавице</h3>
+          </div>
+        </div>
+      </div>
+      <footer class="snow-footer">
+        <div class="snow-layer"></div>
+        <div class="snow-layer soft"></div>
+      </footer>
+    </div>
+
+    <script>
+      // ТЕРМИНАЛНА ЛОГИКА
+      const terminalInput = document.getElementById("terminal-input");
+      const terminalOutput = document.getElementById("terminal-output");
+      const terminalScreen = document.getElementById("terminal-screen");
+      const heartAnimation = document.getElementById("heart-animation");
+      const mainContent = document.getElementById("main-content");
+
+      const correctPassword = "19/09/2025:слънце";
+      let outputDelay = 2000; // След началните текстове
+
+      terminalInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          const command = terminalInput.value.trim();
+          processCommand(command);
+          terminalInput.value = "";
+        }
+      });
+
+      function processCommand(command) {
+        addTerminalLine(`> ${command}`);
+
+        if (command === correctPassword) {
+          unlockSite();
+        } else if (command.toLowerCase() === "help") {
+          addTerminalLine("Подсказка:");
+          addTerminalLine(
+            'Датата, на която се запознахме (DD/MM/YYYY) + ":" + прякорът, с който най-често се обръщам към теб.'
+          );
+        } else {
+          addTerminalLine("Грешна команда.");
+        }
+
+        addTerminalLine(" ");
+      }
+
+      function addTerminalLine(text) {
+        const line = document.createElement("div");
+        line.className = "terminal-line";
+        line.style.animationDelay = "0s";
+        line.textContent = text;
+        terminalOutput.appendChild(line);
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+      }
+
+      function unlockSite() {
+        terminalInput.disabled = true;
+
+        setTimeout(() => {
+          heartAnimation.classList.add("show");
+
+          setTimeout(() => {
+            terminalScreen.classList.add("hidden");
+            mainContent.classList.add("show");
+
+            setTimeout(() => {
+              heartAnimation.classList.remove("show");
+              heartAnimation.classList.add("shrink");
+              createSnowflakes();
+              startTimer();
+            }, 100);
+          }, 3000);
+        }, 500);
+      }
+
+      // СНЯГ ЕФЕКТ
+      function createSnowflakes() {
+        const snowflakeCount = 50;
+        for (let i = 0; i < snowflakeCount; i++) {
+          setTimeout(() => {
+            const snowflake = document.createElement("div");
+            snowflake.classList.add("snowflake");
+            snowflake.innerHTML = "❄";
+            snowflake.style.left = Math.random() * 100 + "%";
+            snowflake.style.animationDuration = Math.random() * 3 + 5 + "s";
+            snowflake.style.animationDelay = Math.random() * 5 + "s";
+            snowflake.style.fontSize = Math.random() * 10 + 10 + "px";
+            snowflake.style.opacity = Math.random() * 0.6 + 0.4;
+            document.body.appendChild(snowflake);
+
+            setTimeout(() => {
+              snowflake.remove();
+            }, 10000);
+          }, i * 200);
+        }
+
+        setInterval(() => {
+          const snowflake = document.createElement("div");
+          snowflake.classList.add("snowflake");
+          snowflake.innerHTML = "❄";
+          snowflake.style.left = Math.random() * 100 + "%";
+          snowflake.style.animationDuration = Math.random() * 3 + 5 + "s";
+          snowflake.style.fontSize = Math.random() * 10 + 10 + "px";
+          snowflake.style.opacity = Math.random() * 0.6 + 0.4;
+          document.body.appendChild(snowflake);
+
+          setTimeout(() => {
+            snowflake.remove();
+          }, 10000);
+        }, 300);
+      }
+
+      // ТАЙМЕР
+      function startTimer() {
+        // Датата, от която сте заедно
+        const startDate = new Date("2025-12-11T00:00:00").getTime();
+
+        const elements = {
+          days: document.getElementById("days"),
+          hours: document.getElementById("hours"),
+          minutes: document.getElementById("minutes"),
+          seconds: document.getElementById("seconds"),
+        };
+
+        const lastValues = {
+          days: null,
+          hours: null,
+          minutes: null,
+          seconds: null,
+        };
+
+        function updateValue(el, newValue, key) {
+          if (lastValues[key] === newValue) return;
+
+          el.innerHTML = "";
+          const span = document.createElement("div");
+          span.className = "flip-inner";
+          span.textContent = newValue;
+          el.appendChild(span);
+
+          lastValues[key] = newValue;
+        }
+
+        function updateTimer() {
+          const now = new Date().getTime();
+          let diff = Math.max(0, now - startDate);
+
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          diff %= 1000 * 60 * 60 * 24;
+
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          diff %= 1000 * 60 * 60;
+
+          const minutes = Math.floor(diff / (1000 * 60));
+          diff %= 1000 * 60;
+
+          const seconds = Math.floor(diff / 1000);
+
+          updateValue(elements.days, days, "days");
+          updateValue(elements.hours, hours, "hours");
+          updateValue(elements.minutes, minutes, "minutes");
+          updateValue(elements.seconds, seconds, "seconds");
+        }
+
+        updateTimer();
+        setInterval(updateTimer, 1000);
+      }
+
+      // ОТВАРЯНЕ НА ПОДАРЪКА
+      document
+        .getElementById("open-gift-btn")
+        .addEventListener("click", function () {
+          const giftBox = document.getElementById("gift-box");
+          const videoContainer = document.getElementById(
+            "gift-video-container"
+          );
+
+          // Fade out бутона
+          this.classList.add("hidden");
+
+          // След 0.5 секунди fade out кутията и fade in видеото
+          setTimeout(() => {
+            giftBox.style.opacity = "0";
+            giftBox.style.transform = "scale(0.8)";
+
+            setTimeout(() => {
+              giftBox.style.display = "none";
+              videoContainer.classList.add("show");
+
+              // Скролване до видеото
+              setTimeout(() => {
+                videoContainer.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+              }, 100);
+            }, 500);
+          }, 500);
+        });
+    </script>
+  </body>
+</html>
